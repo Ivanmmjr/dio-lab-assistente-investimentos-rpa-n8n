@@ -1,0 +1,159 @@
+{
+  "name": "Assistente de Investimentos - Desafio Completo com IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Clientes",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c1be96b7-c3cd-4572-b675-0e73ea0a2c27",
+      "name": "Webhook",
+      "webhookId": "8c3aeb01-5de0-47ad-8ee0-0ed531530b1a"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "clientes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "45e48135-a8e7-44d4-8a79-a2759f15fe79",
+      "name": "Separar Clientes (Split Out)"
+    },
+    {
+      "parameters": {
+        "url": "https://digitalinnovationone.github.io/dio-lab-assistente-investimentos-rpa-n8n/data.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "90af0972-9fc0-44b3-87ae-0cb2a422ccf8",
+      "name": "Ler Opções CSV"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.nome }}, com saldo de R$ {{ $json.saldo }} e perfil {{ $json.perfil }}. Com base nas opções de investimento disponíveis, crie uma recomendação financeira humanizada, inteligente e customizada."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        0
+      ],
+      "id": "398d6eef-3486-406f-b0a7-2b9d86411d20",
+      "name": "Agente de IA (LLM)"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"sucesso\",\n  \"cliente\": \"{{ $('Separar Clientes (Split Out)').item.json.nome }}\",\n  \"recomendacao\": \"{{ $json.text }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "6ec13f94-6f82-4ec9-97fb-a4004196ec51",
+      "name": "Responder Webhook"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        208
+      ],
+      "id": "0dc92e14-e358-437a-bf96-109c8ac438af",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Separar Clientes (Split Out)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Clientes (Split Out)": {
+      "main": [
+        [
+          {
+            "node": "Ler Opções CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Opções CSV": {
+      "main": [
+        [
+          {
+            "node": "Agente de IA (LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de IA (LLM)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3e16a3b5-3a3c-411e-a3ff-62aa5b15de6c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57fee4b778bbf2d778669140e9712a6f463b480ad959f649afe1ab1a3d951356"
+  },
+  "nodeGroups": [],
+  "id": "r02VBHHCw1EXHit9",
+  "tags": []
+}
